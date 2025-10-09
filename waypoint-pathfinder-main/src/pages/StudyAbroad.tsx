@@ -1,5 +1,10 @@
 import { Plane, FileText, DollarSign, Home, ShieldCheck, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
 
 const StudyAbroad = () => {
   const services = [
@@ -74,6 +79,30 @@ const StudyAbroad = () => {
     }
   ];
 
+  const consultants = useMemo(() => ([
+    { id: 1, name: "Aarav Sharma", firm: "VisaMax", rate: 999, exp: "7+ yrs", focus: "USA/Canada" },
+    { id: 2, name: "Priya Verma", firm: "GlobalPath", rate: 899, exp: "5+ yrs", focus: "UK/Australia" },
+    { id: 3, name: "Rahul Khanna", firm: "UniBridge", rate: 1099, exp: "9+ yrs", focus: "Germany/EU" },
+  ]), []);
+
+  const [consultDialogOpen, setConsultDialogOpen] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const [payDialogOpen, setPayDialogOpen] = useState(false);
+  const [selectedConsultant, setSelectedConsultant] = useState<typeof consultants[number] | null>(null);
+  const [hours, setHours] = useState<number>(1);
+
+  const startBooking = (c: typeof consultants[number]) => {
+    setSelectedConsultant(c);
+    setHours(1);
+    setPayDialogOpen(true);
+  };
+
+  const handlePay = () => {
+    setPayDialogOpen(false);
+    setConsultDialogOpen(false);
+    toast.success("Session booked successfully (demo payment)");
+  };
+
   return (
     <div className="min-h-screen py-20 px-6">
       <div className="max-w-7xl mx-auto">
@@ -145,7 +174,14 @@ const StudyAbroad = () => {
                     </div>
                   ))}
                 </div>
-                <Button className="w-full rounded-full" variant="outline">
+                <Button
+                  className="w-full rounded-full"
+                  variant="outline"
+                  onClick={() => {
+                    setSelectedCountry(dest.country);
+                    setConsultDialogOpen(true);
+                  }}
+                >
                   Explore {dest.country}
                 </Button>
               </div>
@@ -196,6 +232,60 @@ const StudyAbroad = () => {
           </div>
         </div>
       </div>
+
+      {/* Consultants Dialog */}
+      <Dialog open={consultDialogOpen} onOpenChange={setConsultDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Visa Consultants {selectedCountry ? `for ${selectedCountry}` : ""}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {consultants.map((c) => (
+              <div key={c.id} className="glass-card p-4 rounded-xl flex items-center justify-between">
+                <div>
+                  <div className="font-semibold text-foreground">{c.name} · {c.firm}</div>
+                  <div className="text-sm text-muted-foreground">Focus: {c.focus} · Experience: {c.exp}</div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="font-bold text-primary">₹{c.rate}/hr</div>
+                  <Button className="rounded-full" onClick={() => startBooking(c)}>Book Session</Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Dialog */}
+      <Dialog open={payDialogOpen} onOpenChange={setPayDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirm Booking</DialogTitle>
+          </DialogHeader>
+          {selectedConsultant && (
+            <div className="space-y-4">
+              <div className="text-sm text-muted-foreground">
+                Consultant: <span className="font-medium text-foreground">{selectedConsultant.name}</span> · {selectedConsultant.firm}
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Hours</Label>
+                  <Input type="number" min={1} value={hours} onChange={(e) => setHours(Math.max(1, Number(e.target.value) || 1))} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Rate</Label>
+                  <Input value={`₹${selectedConsultant.rate}/hr`} disabled />
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="text-lg font-bold">Total</div>
+                <div className="text-lg font-bold text-primary">₹{selectedConsultant.rate * hours}</div>
+              </div>
+              <Button className="w-full" onClick={handlePay}>Pay & Book</Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
