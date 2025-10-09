@@ -15,7 +15,7 @@ import {
   MessageCircle
 } from "lucide-react";
 
-const Landing = () => {
+const LandingPage = () => {
   const features = [
     {
       icon: GraduationCap,
@@ -410,4 +410,4 @@ const Landing = () => {
   );
 };
 
-export default Landing;
+export default LandingPage;

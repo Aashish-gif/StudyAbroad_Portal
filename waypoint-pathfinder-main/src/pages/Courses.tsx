@@ -201,25 +201,7 @@ const Courses = () => {
           </p>
         </div>
 
-        {/* Explore Featured Courses (moved under header) */}
-        <div className="glass-card p-12 rounded-2xl mb-12">
-          <h2 className="text-3xl font-bold mb-8 text-center text-foreground">Featured Courses</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {detailedCourses.map((item, index) => (
-              <div key={`${item.title}-${index}`} className="bg-gradient-to-br from-white to-secondary p-6 rounded-xl hover:shadow-lg transition-all duration-300">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <div className="text-xs uppercase tracking-wide text-primary mb-1">{item.category}</div>
-                    <h3 className="text-xl font-bold text-foreground">{item.title}</h3>
-                  </div>
-                  <Badge variant="secondary">{item.level}</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground mb-6 line-clamp-3">{item.overview}</p>
-                <Button size="sm" className="rounded-full w-full" onClick={() => setActiveCourse(item)}>View More</Button>
-              </div>
-            ))}
-          </div>
-        </div>
+        
 
         {/* Course Categories */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
@@ -235,14 +217,27 @@ const Courses = () => {
                   <Icon className="h-7 w-7 text-white" />
                 </div>
                 <h3 className="text-xl font-bold mb-3 text-foreground">{category.title}</h3>
-                 <ul className="space-y-2 mb-4">
-                   {category.courses.map((course, idx) => (
-                     <li key={idx} className="text-muted-foreground flex items-center gap-2">
-                       <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
-                       <span>{course}</span>
-                     </li>
-                   ))}
-                 </ul>
+                <ul className="space-y-2 mb-4">
+                  {category.courses.map((course, idx) => (
+                    <li key={idx} className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
+                        <span>{course}</span>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-primary"
+                        onClick={() => {
+                          const item = detailedCourses.find(dc => dc.title === course);
+                          setActiveCourse(item || { title: course, category: category.title });
+                        }}
+                      >
+                        View More
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
                 <Button variant="outline" className="w-full rounded-full">
                   View All Courses
                 </Button>

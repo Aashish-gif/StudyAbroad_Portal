@@ -1,8 +1,43 @@
-import { Target, BookOpen, Clock, Award } from "lucide-react";
+import { useMemo, useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Target, BookOpen, Clock, Award, PlayCircle, Timer, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { fetchBestPlaylists } from "@/utils/youtube";
 
 const TestPrep = () => {
+  const [detailsTest, setDetailsTest] = useState<any | null>(null);
+  const [prepTest, setPrepTest] = useState<any | null>(null);
+  const [ytQuery, setYtQuery] = useState<string>("");
+  const [playlists, setPlaylists] = useState<any[]>([]);
+  const [loadingPlaylists, setLoadingPlaylists] = useState(false);
+  const [activeTab, setActiveTab] = useState("playlists");
+
+  // Simple MCQ test state
+  const [testOpen, setTestOpen] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [answers, setAnswers] = useState<Record<number, number | null>>({});
+  const [submitted, setSubmitted] = useState(false);
+
+  const dummyQuestions = useMemo(() => ([
+    { q: "What is 2 + 2?", options: ["3", "4", "5", "6"], correct: 1 },
+    { q: "Which is a prime number?", options: ["9", "12", "13", "15"], correct: 2 },
+    { q: "What is the capital of France?", options: ["Berlin", "Madrid", "Paris", "Rome"], correct: 2 },
+  ]), []);
+
+  useEffect(() => {
+    if (!testOpen) return;
+    setTimeLeft(60); // 60 seconds for demo
+  }, [testOpen]);
+
+  useEffect(() => {
+    if (!testOpen || submitted) return;
+    if (timeLeft <= 0) return;
+    const t = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+    return () => clearTimeout(t);
+  }, [testOpen, timeLeft, submitted]);
   const tests = [
     {
       name: "GRE",
@@ -146,8 +181,14 @@ const TestPrep = () => {
               </div>
 
               <div className="flex gap-3">
-                <Button className="flex-1 rounded-full">Start Preparation</Button>
-                <Button variant="outline" className="flex-1 rounded-full">Learn More</Button>
+                <Link to={`/test-prep/${test.name.toLowerCase()}/start`} className="flex-1">
+                  <Button className="w-full rounded-full">
+                    Start Preparation
+                  </Button>
+                </Link>
+                <Link to={`/test-prep/${test.name.toLowerCase()}`} className="flex-1">
+                  <Button variant="outline" className="w-full rounded-full">Learn More</Button>
+                </Link>
               </div>
             </div>
           ))}
@@ -170,6 +211,163 @@ const TestPrep = () => {
           </div>
         </div>
       </div>
+      {/* Learn More Dialog */}
+      <Dialog open={!!detailsTest} onOpenChange={(o) => !o && setDetailsTest(null)}>
+        <DialogContent className="bg-white border border-gray-200 text-gray-900 max-w-2xl">
+          {detailsTest && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-2xl">{detailsTest.fullName} ({detailsTest.name})</DialogTitle>
+                <DialogDescription>{detailsTest.description}</DialogDescription>
+              </DialogHeader>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <p className="text-sm font-medium mb-2">Duration</p>
+                  <div className="flex items-center gap-2 text-sm"><Clock className="h-4 w-4 text-primary" />{detailsTest.duration}</div>
+                  <p className="text-sm font-medium mt-4 mb-2">Sections</p>
+                  <div className="flex flex-wrap gap-2">
+                    {detailsTest.sections.map((s: string, i: number) => (<Badge key={i} variant="outline" className="text-xs">{s}</Badge>))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-2">Score Range</p>
+                  <Badge className="bg-primary">{detailsTest.score}</Badge>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Start Preparation Dialog */}
+      <Dialog open={!!prepTest} onOpenChange={(o) => !o && setPrepTest(null)}>
+        <DialogContent className="bg-white border border-gray-200 text-gray-900 max-w-3xl">
+          {prepTest && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-2xl">Start Preparation: {prepTest.name}</DialogTitle>
+                <DialogDescription>Curated resources and practice for {prepTest.fullName}</DialogDescription>
+              </DialogHeader>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid grid-cols-3 w-full">
+                  <TabsTrigger value="playlists">Best Playlists</TabsTrigger>
+                  <TabsTrigger value="dpp">DPP</TabsTrigger>
+                  <TabsTrigger value="tests">Tests</TabsTrigger>
+                </TabsList>
+                <TabsContent value="playlists" className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-700">Query: <span className="font-semibold">{ytQuery || (prepTest.name + " preparation")}</span></div>
+                    <Button size="sm" onClick={async () => {
+                      try {
+                        setLoadingPlaylists(true);
+                        const res = await fetchBestPlaylists(ytQuery || (prepTest.name + " preparation"));
+                        setPlaylists(res);
+                      } catch (e) {
+                        console.error(e);
+                        alert('Failed to fetch playlists');
+                      } finally {
+                        setLoadingPlaylists(false);
+                      }
+                    }} disabled={loadingPlaylists}>
+                      {loadingPlaylists ? 'Loading...' : 'Fetch Playlists'}
+                    </Button>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {playlists.map((p: any) => (
+                      <a key={p.id} href={`https://www.youtube.com/playlist?list=${p.id}`} target="_blank" rel="noreferrer" className="block rounded-xl border hover:shadow-lg transition overflow-hidden">
+                        {p.thumbnailUrl && (<img src={p.thumbnailUrl} alt={p.title} className="w-full h-40 object-cover" />)}
+                        <div className="p-4">
+                          <div className="font-semibold mb-1 line-clamp-2">{p.title}</div>
+                          <div className="text-xs text-gray-500 flex items-center gap-1"><PlayCircle className="h-3 w-3" /> {p.channelTitle}</div>
+                        </div>
+                      </a>
+                    ))}
+                    {!loadingPlaylists && playlists.length === 0 && (
+                      <div className="text-sm text-gray-600">Click "Fetch Playlists" to load recommendations.</div>
+                    )}
+                  </div>
+                </TabsContent>
+                <TabsContent value="dpp" className="space-y-3">
+                  <div className="text-sm text-gray-700">Daily Practice Problems (DPP) - Dummy data</div>
+                  {[1,2,3,4,5].map((n) => (
+                    <div key={n} className="rounded-lg border p-4 flex items-center justify-between">
+                      <div>
+                        <div className="font-semibold">Set {n}</div>
+                        <div className="text-xs text-gray-500">20 questions • Mixed difficulty</div>
+                      </div>
+                      <Button size="sm" variant="outline">Open</Button>
+                    </div>
+                  ))}
+                </TabsContent>
+                <TabsContent value="tests" className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-700">Timed MCQ Test - Demo</div>
+                    <Button size="sm" onClick={() => { setTestOpen(true); setSubmitted(false); setAnswers({}); }}>Start Test</Button>
+                  </div>
+                  <Dialog open={testOpen} onOpenChange={(o) => { if (!o) { setTestOpen(false); setSubmitted(false); } }}>
+                    <DialogContent className="bg-white border border-gray-200 text-gray-900 max-w-2xl">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="font-semibold">Test - {prepTest.name}</div>
+                        <div className="flex items-center gap-2 text-sm"><Timer className="h-4 w-4" /> {timeLeft}s</div>
+                      </div>
+                      <div className="space-y-4">
+                        {dummyQuestions.map((q, qi) => (
+                          <div key={qi} className="rounded-lg border p-4">
+                            <div className="font-medium mb-2">Q{qi + 1}. {q.q}</div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              {q.options.map((opt, oi) => {
+                                const selected = answers[qi] === oi;
+                                const correct = submitted && q.correct === oi;
+                                const wrong = submitted && selected && q.correct !== oi;
+                                return (
+                                  <button
+                                    key={oi}
+                                    className={`text-left rounded-lg border p-2 transition ${selected ? 'border-primary' : ''} ${correct ? 'bg-green-50 border-green-400' : ''} ${wrong ? 'bg-red-50 border-red-400' : ''}`}
+                                    onClick={() => !submitted && setAnswers({ ...answers, [qi]: oi })}
+                                  >
+                                    {opt}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex items-center justify-end gap-2 mt-4">
+                        {!submitted ? (
+                          <Button onClick={() => setSubmitted(true)} disabled={timeLeft <= 0}>Submit</Button>
+                        ) : (
+                          <Button variant="outline" onClick={() => { setTestOpen(false); setSubmitted(false); }}>Close</Button>
+                        )}
+                      </div>
+                      {submitted && (
+                        <div className="mt-4 rounded-lg border p-4">
+                          {(() => {
+                            const score = dummyQuestions.reduce((acc, q, i) => acc + ((answers[i] === q.correct) ? 1 : 0), 0);
+                            return (
+                              <div>
+                                <div className="font-semibold mb-2">Score: {score} / {dummyQuestions.length}</div>
+                                <div className="space-y-2">
+                                  {dummyQuestions.map((q, i) => (
+                                    <div key={i} className="text-sm flex items-center gap-2">
+                                      {answers[i] === q.correct ? <CheckCircle2 className="h-4 w-4 text-green-600" /> : <XCircle className="h-4 w-4 text-red-600" />}
+                                      <span>Q{i+1} Correct Answer: {q.options[q.correct]}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      )}
+                    </DialogContent>
+                  </Dialog>
+                </TabsContent>
+              </Tabs>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
