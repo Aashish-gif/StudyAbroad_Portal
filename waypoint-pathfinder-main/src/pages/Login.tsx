@@ -11,6 +11,7 @@ import { Eye, EyeOff, Mail, Lock, User, BookOpen, Users, Plane, Globe, Graduatio
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedRole, setSelectedRole] = useState<"student" | "mentor" | "consultant">("student");
+  const [formData, setFormData] = useState<{ password: string }>({ password: "" });
 
   const roles = [
     {
