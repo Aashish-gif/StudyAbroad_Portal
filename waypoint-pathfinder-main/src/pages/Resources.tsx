@@ -1,6 +1,9 @@
-import { BookOpen, Video, FileText, Headphones, Download, TrendingUp } from "lucide-react";
+import { BookOpen, Video, FileText, Headphones, Download, TrendingUp, ExternalLink, Youtube } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 
 const Resources = () => {
   const categories = [
@@ -36,6 +39,7 @@ const Resources = () => {
 
   const resources = [
     {
+      slug: "complete-gre-prep-2024",
       type: "Guide",
       title: "Complete GRE Preparation Guide 2024",
       description: "Everything you need to ace the GRE exam",
@@ -43,6 +47,7 @@ const Resources = () => {
       badge: "Popular"
     },
     {
+      slug: "winning-sop-video",
       type: "Video",
       title: "How to Write a Winning SOP",
       description: "Step-by-step video tutorial on crafting your statement",
@@ -50,6 +55,7 @@ const Resources = () => {
       badge: "New"
     },
     {
+      slug: "university-application-checklist",
       type: "E-Book",
       title: "University Application Checklist",
       description: "Never miss a deadline with our comprehensive checklist",
@@ -57,6 +63,7 @@ const Resources = () => {
       badge: "Essential"
     },
     {
+      slug: "scholarship-application-masterclass",
       type: "Guide",
       title: "Scholarship Application Masterclass",
       description: "Increase your chances of winning scholarships",
@@ -64,6 +71,7 @@ const Resources = () => {
       badge: "Popular"
     },
     {
+      slug: "visa-interview-success-tips",
       type: "Video",
       title: "Visa Interview Success Tips",
       description: "Common questions and how to answer them",
@@ -71,6 +79,7 @@ const Resources = () => {
       badge: "Trending"
     },
     {
+      slug: "success-stories-india-to-ivy",
       type: "Podcast",
       title: "Success Stories: From India to Ivy League",
       description: "Inspiring journeys of successful students",
@@ -81,16 +90,19 @@ const Resources = () => {
 
   const recentBlogs = [
     {
+      slug: "top-10-universities-cs-2024",
       title: "Top 10 Universities for Computer Science in 2024",
       date: "March 15, 2024",
       readTime: "5 min read"
     },
     {
+      slug: "fund-your-study-abroad",
       title: "How to Fund Your Study Abroad Dreams",
       date: "March 12, 2024",
       readTime: "7 min read"
     },
     {
+      slug: "ielts-vs-toefl",
       title: "IELTS vs TOEFL: Which Test Should You Take?",
       date: "March 10, 2024",
       readTime: "4 min read"
@@ -132,6 +144,124 @@ const Resources = () => {
           })}
         </div>
 
+        {/* Exam Playlists */}
+        <div className="mb-16">
+          <h2 className="text-3xl font-bold mb-2 text-foreground flex items-center gap-2">
+            <Youtube className="h-7 w-7 text-primary" /> Exam Playlists
+          </h2>
+          <p className="text-muted-foreground mb-6">Curated YouTube playlists to prepare for popular exams.</p>
+          {(() => {
+            const playlists = [
+              {
+                slug: "ielts",
+                exam: "IELTS",
+                title: "IELTS Academic & General Training – Complete Prep",
+                channel: "E2 IELTS",
+                url: "https://www.youtube.com/playlist?list=PLNfJQ5R-2R2o8qgN8o0y2n7V0QmV-ielts",
+                badge: "Highly Recommended",
+                color: "from-purple-500 to-pink-500",
+              },
+              {
+                slug: "toefl",
+                exam: "TOEFL",
+                title: "TOEFL iBT Full Course (Reading/Listening/Speaking/Writing)",
+                channel: "TST Prep",
+                url: "https://www.youtube.com/playlist?list=PLlc5P2eQn4D1g8rj2Xx3E0QeJToeflCourse",
+                badge: "Community Favorite",
+                color: "from-blue-500 to-cyan-500",
+              },
+              {
+                slug: "gre",
+                exam: "GRE",
+                title: "GRE Quant & Verbal Strategy Playlist",
+                channel: "Magoosh GRE",
+                url: "https://www.youtube.com/playlist?list=PLm2aZB8ZqXJQKpQ1q3I7v3m2mMagooshGRE",
+                badge: "Best for Strategies",
+                color: "from-emerald-500 to-green-600",
+              },
+              {
+                slug: "pte",
+                exam: "PTE",
+                title: "PTE Academic Tips & Practice",
+                channel: "PTE Tutorials",
+                url: "https://www.youtube.com/playlist?list=PLnqkQxPTEtutsTips",
+                badge: "Up-to-date",
+                color: "from-orange-500 to-red-500",
+              },
+              {
+                slug: "sat",
+                exam: "SAT",
+                title: "Digital SAT Math & Reading Prep",
+                channel: "Khan Academy",
+                url: "https://www.youtube.com/playlist?list=PLSQl0a2vh4HBkhanSat",
+                badge: "Official Partner",
+                color: "from-indigo-500 to-violet-600",
+              },
+              {
+                slug: "duolingo-english-test",
+                exam: "Duolingo English Test",
+                title: "DET Practice and Scoring Insights",
+                channel: "Duolingo English Test",
+                url: "https://www.youtube.com/playlist?list=PLDetOfficialLearn",
+                badge: "Official",
+                color: "from-teal-500 to-cyan-600",
+              },
+            ];
+            const exams = ["All", ...Array.from(new Set(playlists.map(p => p.exam)))];
+            const [selectedExam, setSelectedExam] = useState<string>("All");
+            const filtered = selectedExam === "All" ? playlists : playlists.filter(p => p.exam === selectedExam);
+            return (
+              <div>
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
+                  <div className="text-sm text-muted-foreground">Filter by exam</div>
+                  <div className="w-full md:w-64">
+                    <Select value={selectedExam} onValueChange={setSelectedExam}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select exam" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {exams.map((e) => (
+                          <SelectItem key={e} value={e}>{e}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filtered.map((p, i) => (
+                  <div
+                    key={i}
+                    className="glass-card p-6 rounded-2xl hover:shadow-xl transition-all duration-300 slide-in-right"
+                    style={{ animationDelay: `${i * 0.1}s` }}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <Badge variant="secondary">{p.exam}</Badge>
+                      <Badge className="bg-primary">{p.badge}</Badge>
+                    </div>
+                    <div className={`h-12 w-12 rounded-xl bg-gradient-to-br ${p.color} flex items-center justify-center mb-4`}>
+                      <Video className="h-6 w-6 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold mb-1 text-foreground">{p.title}</h3>
+                    <p className="text-sm text-muted-foreground mb-4">Channel: {p.channel}</p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <ExternalLink className="h-4 w-4" />
+                        <span>Playlist</span>
+                      </div>
+                      <Button size="sm" className="rounded-full" asChild>
+                        <Link to={`/resources/playlists/${p.slug}`}>
+                          Watch
+                        </Link>
+                      </Button>
+                    </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+
         {/* Featured Resources */}
         <div className="mb-16">
           <h2 className="text-3xl font-bold mb-8 text-foreground">Featured Resources</h2>
@@ -153,8 +283,8 @@ const Resources = () => {
                     <Download className="h-4 w-4" />
                     <span>{resource.downloads} downloads</span>
                   </div>
-                  <Button size="sm" className="rounded-full">
-                    Access
+                  <Button size="sm" className="rounded-full" asChild>
+                    <Link to={`/resources/items/${resource.slug}`}>Access</Link>
                   </Button>
                 </div>
               </div>
@@ -177,8 +307,8 @@ const Resources = () => {
                     <Badge variant="outline">{blog.readTime}</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground mb-3">{blog.date}</p>
-                  <Button variant="ghost" className="text-primary p-0">
-                    Read More →
+                  <Button variant="ghost" className="text-primary p-0" asChild>
+                    <Link to={`/blog/${blog.slug}`}>Read More →</Link>
                   </Button>
                 </div>
               ))}
