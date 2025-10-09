@@ -115,3 +115,4 @@ const FeatureCard = ({ icon: Icon, title, description, index, gradient = "from-b
 };
 
 export default FeatureCard;
+

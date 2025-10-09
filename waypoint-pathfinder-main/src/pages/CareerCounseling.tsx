@@ -1,8 +1,20 @@
-import { Compass, Users, TrendingUp, MessageCircle, Calendar, Star } from "lucide-react";
+import { useState } from "react";
+import { Compass, Users, TrendingUp, MessageCircle, Calendar, Star, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const CareerCounseling = () => {
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [selectedCounselor, setSelectedCounselor] = useState<string | null>(null);
+  const [bookingData, setBookingData] = useState({ date: '', time: '', email: '', message: '' });
+  const [isBooked, setIsBooked] = useState(false);
+  const [meetLink, setMeetLink] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const services = [
     {
       icon: Compass,
@@ -153,10 +165,122 @@ const CareerCounseling = () => {
                     </div>
                   </div>
                 </div>
-                <Button className="w-full mt-4 rounded-full" size="sm">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Book Session
-                </Button>
+                <Dialog open={bookingOpen} onOpenChange={setBookingOpen}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      className="w-full mt-4 rounded-full" size="sm"
+                      onClick={() => { setSelectedCounselor(counselor.name); setIsBooked(false); setMeetLink(null); }}
+                    >
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Book Session
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-white border border-gray-200 text-gray-900 max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="text-2xl text-gray-900">Book with {selectedCounselor}</DialogTitle>
+                      <DialogDescription className="text-gray-600">Schedule your counseling session</DialogDescription>
+                    </DialogHeader>
+                    {!isBooked ? (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-gray-700">Date</Label>
+                            <Input
+                              type="date"
+                              value={bookingData.date}
+                              onChange={(e) => setBookingData({ ...bookingData, date: e.target.value })}
+                              className="bg-white border-gray-300 text-gray-900"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-gray-700">Time</Label>
+                            <Select onValueChange={(value) => setBookingData({ ...bookingData, time: value })}>
+                              <SelectTrigger className="bg-white border-gray-300 text-gray-900">
+                                <SelectValue placeholder="Select time" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="09:00">09:00 AM</SelectItem>
+                                <SelectItem value="11:00">11:00 AM</SelectItem>
+                                <SelectItem value="14:00">02:00 PM</SelectItem>
+                                <SelectItem value="16:00">04:00 PM</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="text-gray-700">Your Email</Label>
+                          <Input
+                            type="email"
+                            placeholder="your@email.com"
+                            value={bookingData.email}
+                            onChange={(e) => setBookingData({ ...bookingData, email: e.target.value })}
+                            className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-500"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-gray-700">Message (Optional)</Label>
+                          <Textarea
+                            placeholder="Tell us about your goals..."
+                            value={bookingData.message}
+                            onChange={(e) => setBookingData({ ...bookingData, message: e.target.value })}
+                            className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-500"
+                          />
+                        </div>
+                        <Button
+                          className="w-full bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700"
+                          disabled={submitting || !bookingData.date || !bookingData.time || !bookingData.email}
+                          onClick={async () => {
+                            try {
+                              setSubmitting(true);
+                              const res = await fetch('/api/book', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  consultantName: selectedCounselor,
+                                  userEmail: bookingData.email,
+                                  date: bookingData.date,
+                                  time: bookingData.time,
+                                  message: bookingData.message,
+                                })
+                              });
+                              if (!res.ok) throw new Error('Booking failed');
+                              const data = await res.json();
+                              setMeetLink(data.meetLink);
+                              setIsBooked(true);
+                            } catch (e) {
+                              console.error(e);
+                              alert('Failed to book session. Please try again.');
+                            } finally {
+                              setSubmitting(false);
+                            }
+                          }}
+                        >
+                          <Calendar className="h-4 w-4 mr-2" />
+                          {submitting ? 'Booking...' : 'Confirm Booking'}
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <div className="w-16 h-16 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Mail className="h-8 w-8 text-white" />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">Booking Confirmed! 🎉</h3>
+                        <p className="text-gray-600 mb-4">
+                          Meeting link has been sent to <span className="text-blue-600">{bookingData.email}</span>
+                        </p>
+                        <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                          <p className="text-sm text-gray-900">
+                            <strong>Meet Link:</strong><br/>
+                            <span className="text-blue-600">{meetLink || 'Generating link...'}</span>
+                          </p>
+                        </div>
+                        <Badge className="bg-gradient-to-r from-green-400 to-blue-500 text-white">
+                          Check your email for details
+                        </Badge>
+                      </div>
+                    )}
+                  </DialogContent>
+                </Dialog>
               </div>
             ))}
           </div>
@@ -169,9 +293,100 @@ const CareerCounseling = () => {
             Take the first step towards a fulfilling career. Book a free consultation 
             session with one of our expert counselors and discover your potential.
           </p>
-          <Button size="lg" className="rounded-full px-8">
-            Book Free Consultation
-          </Button>
+          <Dialog open={bookingOpen} onOpenChange={setBookingOpen}>
+            <DialogTrigger asChild>
+              <Button size="lg" className="rounded-full px-8" onClick={() => { setSelectedCounselor('Any Counselor'); setIsBooked(false); setMeetLink(null); }}>
+                Book Free Consultation
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-white border border-gray-200 text-gray-900 max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-2xl text-gray-900">Book a Session</DialogTitle>
+                <DialogDescription className="text-gray-600">Schedule your counseling session</DialogDescription>
+              </DialogHeader>
+              {!isBooked ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-gray-700">Date</Label>
+                      <Input type="date" value={bookingData.date} onChange={(e) => setBookingData({ ...bookingData, date: e.target.value })} className="bg-white border-gray-300 text-gray-900" />
+                    </div>
+                    <div>
+                      <Label className="text-gray-700">Time</Label>
+                      <Select onValueChange={(value) => setBookingData({ ...bookingData, time: value })}>
+                        <SelectTrigger className="bg-white border-gray-300 text-gray-900">
+                          <SelectValue placeholder="Select time" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="09:00">09:00 AM</SelectItem>
+                          <SelectItem value="11:00">11:00 AM</SelectItem>
+                          <SelectItem value="14:00">02:00 PM</SelectItem>
+                          <SelectItem value="16:00">04:00 PM</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-gray-700">Your Email</Label>
+                    <Input type="email" placeholder="your@email.com" value={bookingData.email} onChange={(e) => setBookingData({ ...bookingData, email: e.target.value })} className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-500" />
+                  </div>
+                  <div>
+                    <Label className="text-gray-700">Message (Optional)</Label>
+                    <Textarea placeholder="Tell us about your goals..." value={bookingData.message} onChange={(e) => setBookingData({ ...bookingData, message: e.target.value })} className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-500" />
+                  </div>
+                  <Button
+                    className="w-full bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700"
+                    disabled={submitting || !bookingData.date || !bookingData.time || !bookingData.email}
+                    onClick={async () => {
+                      try {
+                        setSubmitting(true);
+                        const res = await fetch('/api/book', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            consultantName: selectedCounselor,
+                            userEmail: bookingData.email,
+                            date: bookingData.date,
+                            time: bookingData.time,
+                            message: bookingData.message,
+                          })
+                        });
+                        if (!res.ok) throw new Error('Booking failed');
+                        const data = await res.json();
+                        setMeetLink(data.meetLink);
+                        setIsBooked(true);
+                      } catch (e) {
+                        console.error(e);
+                        alert('Failed to book session. Please try again.');
+                      } finally {
+                        setSubmitting(false);
+                      }
+                    }}
+                  >
+                    <Calendar className="h-4 w-4 mr-2" />
+                    {submitting ? 'Booking...' : 'Confirm Booking'}
+                  </Button>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Mail className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Booking Confirmed! 🎉</h3>
+                  <p className="text-gray-600 mb-4">
+                    Meeting link has been sent to <span className="text-blue-600">{bookingData.email}</span>
+                  </p>
+                  <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                    <p className="text-sm text-gray-900">
+                      <strong>Meet Link:</strong><br/>
+                      <span className="text-blue-600">{meetLink || 'Generating link...'}</span>
+                    </p>
+                  </div>
+                  <Badge className="bg-gradient-to-r from-green-400 to-blue-500 text-white">Check your email for details</Badge>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </div>

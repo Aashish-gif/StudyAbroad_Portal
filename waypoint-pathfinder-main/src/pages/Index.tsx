@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle, Star, Award, Users, Globe2, BookOpen, TrendingUp, Shield, Sparkles, Zap, GraduationCap, Brain, Target } from "lucide-react";
+import { ArrowRight, CheckCircle, Star, Award, Users, Globe2, BookOpen, TrendingUp, Shield, Sparkles, Zap, GraduationCap, Brain, Target, Rocket, Heart, Crown } from "lucide-react";
 import heroImage from "@/assets/hero-students.jpg";
 import counselingImage from "@/assets/counseling-illustration.png";
 import globalImage from "@/assets/global-education.png";
@@ -89,9 +89,33 @@ const Index = () => {
 
   return (
     <div className="min-h-screen premium-bg">
-      <AnimatedBackground />
-      <SplineFloatingElements intensity={0.5} />
-      <PatternBackground pattern="dots" intensity={0.05} />
+      {/* Animated Background Orbs */}
+      <div className="absolute inset-0">
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={i}
+            className={`absolute rounded-full blur-3xl opacity-20 ${
+              i % 3 === 0 ? 'bg-pink-500' : i % 3 === 1 ? 'bg-cyan-500' : 'bg-yellow-500'
+            }`}
+            style={{
+              width: `${200 + i * 50}px`,
+              height: `${200 + i * 50}px`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              x: [0, 100, -100, 0],
+              y: [0, -100, 100, 0],
+              scale: [1, 1.2, 0.8, 1],
+            }}
+            transition={{
+              duration: 20 + i * 5,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          />
+        ))}
+      </div>
       
       {/* Hero Section */}
       <section className="relative overflow-hidden">
@@ -120,21 +144,21 @@ const Index = () => {
               </motion.div>
               
               <motion.h1 
-                className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight"
+                className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight text-foreground"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.8 }}
               >
-                Your Journey to
+                Bridge Your Dreams to
                 <motion.span 
-                  className="block text-gradient"
+                  className="block bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.5, duration: 0.6 }}
                 >
                   Global Education
                 </motion.span>
-                Starts Here
+                with PathBridge
               </motion.h1>
               
               <motion.p 
@@ -143,7 +167,7 @@ const Index = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.6 }}
               >
-                Get expert guidance, AI-powered insights, and comprehensive support to study at your dream university abroad.
+                Connect with expert consultants, AI-powered tools, and dedicated mentors to make your study abroad dreams a reality. 🌟
               </motion.p>
               
               <motion.div 
@@ -152,29 +176,29 @@ const Index = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5, duration: 0.6 }}
               >
-                <Link to="/career-counseling">
+                <Link to="/login">
                   <motion.div
                     whileHover={{ scale: 1.05, y: -2 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <Button size="lg" className="btn-primary-custom rounded-full px-8 h-14 text-lg font-semibold">
-                      Book Free Consultation
+                    <Button size="lg" className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-full px-8 h-14 text-lg font-semibold shadow-2xl">
+                      Start Your Journey
                       <motion.div
                         animate={{ x: [0, 5, 0] }}
                         transition={{ duration: 1.5, repeat: Infinity }}
                       >
-                        <ArrowRight className="ml-2 h-5 w-5" />
+                        <Rocket className="ml-2 h-5 w-5" />
                       </motion.div>
                     </Button>
                   </motion.div>
                 </Link>
-                <Link to="/universities">
+                <Link to="/about">
                   <motion.div
                     whileHover={{ scale: 1.05, y: -2 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <Button size="lg" variant="outline" className="rounded-full px-8 h-14 text-lg font-semibold border-2">
-                      Explore Universities
+                    <Button size="lg" variant="outline" className="rounded-full px-8 h-14 text-lg font-semibold border-2 border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-white">
+                      Learn More
                     </Button>
                   </motion.div>
                 </Link>
@@ -187,9 +211,9 @@ const Index = () => {
                 transition={{ delay: 0.6, duration: 0.6 }}
               >
                 {[
-                  "No Cost EMI Available",
-                  "Free Profile Evaluation", 
-                  "Visa Success Guarantee"
+                  "🎯 AI-Powered Matching",
+                  "💬 24/7 Expert Support", 
+                  "🏆 99% Success Rate"
                 ].map((item, index) => (
                   <motion.div 
                     key={index} 
@@ -205,7 +229,7 @@ const Index = () => {
                     >
                       <CheckCircle className="h-5 w-5 text-primary" />
                     </motion.div>
-                    <span className="font-medium">{item}</span>
+                    <span className="font-medium text-foreground">{item}</span>
                   </motion.div>
                 ))}
               </motion.div>
@@ -458,8 +482,8 @@ const Index = () => {
                 towards your dream education.
               </p>
               <div className="flex flex-wrap gap-4 justify-center">
-                <Link to="/career-counseling">
-                  <Button size="lg" className="btn-primary-custom rounded-full px-10 h-16 text-lg font-semibold">
+                <Link to="/student/consultants">
+                  <Button size="lg" className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white rounded-full px-10 h-16 text-lg font-semibold shadow-2xl">
                     Book Free Consultation
                     <ArrowRight className="ml-2 h-6 w-6" />
                   </Button>

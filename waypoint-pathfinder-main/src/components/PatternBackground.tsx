@@ -76,3 +76,4 @@ const PatternBackground = ({
 };
 
 export default PatternBackground;
+

@@ -18,8 +18,11 @@ import Resources from "./pages/Resources";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
+import StudentDashboard from "./pages/student/Dashboard";
+import StudentConsultants from "./pages/student/Consultants";
 import MentorDashboard from "./pages/mentor/Dashboard";
 import ConsultantDashboard from "./pages/consultant/Dashboard";
+import StudentLayout from "./components/layouts/StudentLayout";
 import MentorLayout from "./components/layouts/MentorLayout";
 import ConsultantLayout from "./components/layouts/ConsultantLayout";
 
@@ -48,6 +51,8 @@ const App = () => (
               <Route path="/resources" element={<Resources />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/student/dashboard" element={<StudentLayout><StudentDashboard /></StudentLayout>} />
+              <Route path="/student/consultants" element={<StudentLayout><StudentConsultants /></StudentLayout>} />
               <Route path="/mentor/dashboard" element={<MentorLayout><MentorDashboard /></MentorLayout>} />
               <Route path="/consultant/dashboard" element={<ConsultantLayout><ConsultantDashboard /></ConsultantLayout>} />
               <Route path="*" element={<NotFound />} />

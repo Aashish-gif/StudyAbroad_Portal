@@ -96,3 +96,4 @@ const FloatingStats = () => {
 };
 
 export default FloatingStats;
+
