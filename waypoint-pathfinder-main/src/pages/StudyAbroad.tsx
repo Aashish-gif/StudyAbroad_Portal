@@ -1,5 +1,10 @@
 import { Plane, FileText, DollarSign, Home, ShieldCheck, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 const StudyAbroad = () => {
   const services = [
@@ -74,6 +79,60 @@ const StudyAbroad = () => {
     }
   ];
 
+  const consultants = useMemo(() => ([
+    { id: 1, name: "Aarav Sharma", firm: "VisaMax", rate: 999, exp: "7+ yrs", focus: "USA/Canada" },
+    { id: 2, name: "Priya Verma", firm: "GlobalPath", rate: 899, exp: "5+ yrs", focus: "UK/Australia" },
+    { id: 3, name: "Rahul Khanna", firm: "UniBridge", rate: 1099, exp: "9+ yrs", focus: "Germany/EU" },
+  ]), []);
+
+  const [consultDialogOpen, setConsultDialogOpen] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const [payDialogOpen, setPayDialogOpen] = useState(false);
+  const [selectedConsultant, setSelectedConsultant] = useState<typeof consultants[number] | null>(null);
+  const [hours, setHours] = useState<number>(1);
+  const [dateTime, setDateTime] = useState<string>("");
+  const [bookings, setBookings] = useState<Array<{ id: string; name: string; firm: string; when: string; hours: number; rate: number; link: string }>>([]);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("waypoint_bookings");
+      if (raw) setBookings(JSON.parse(raw));
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("waypoint_bookings", JSON.stringify(bookings));
+    } catch {}
+  }, [bookings]);
+
+  const startBooking = (c: typeof consultants[number]) => {
+    setSelectedConsultant(c);
+    setHours(1);
+    setDateTime("");
+    setPayDialogOpen(true);
+  };
+
+  const handlePay = () => {
+    setPayDialogOpen(false);
+    setConsultDialogOpen(false);
+    const link = "https://meet.google.com/new"; // instant Google Meet link
+    const when = dateTime || new Date().toISOString();
+    if (selectedConsultant) {
+      const newBooking = {
+        id: `${Date.now()}`,
+        name: selectedConsultant.name,
+        firm: selectedConsultant.firm,
+        when,
+        hours,
+        rate: selectedConsultant.rate,
+        link,
+      };
+      setBookings(prev => [newBooking, ...prev]);
+    }
+    toast.success("Session booked successfully (demo payment)");
+  };
+
   return (
     <div className="min-h-screen py-20 px-6">
       <div className="max-w-7xl mx-auto">
@@ -87,6 +146,28 @@ const StudyAbroad = () => {
             step of your study abroad journey, from university selection to settling in.
           </p>
         </div>
+
+        {/* Upcoming Sessions */}
+        {bookings.length > 0 && (
+          <div className="glass-card p-6 rounded-2xl mb-12">
+            <h2 className="text-2xl font-bold mb-4 text-foreground">Upcoming Sessions</h2>
+            <div className="space-y-3">
+              {bookings.map((b) => (
+                <div key={b.id} className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                  <div>
+                    <div className="font-semibold text-foreground">{b.name} · {b.firm}</div>
+                    <div className="text-sm text-muted-foreground">{new Date(b.when).toLocaleString()} · {b.hours}h · ₹{b.rate}/hr</div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Button variant="outline" asChild>
+                      <a href={b.link} target="_blank" rel="noreferrer">Join Meeting</a>
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Services */}
         <div className="grid md:grid-cols-2 gap-8 mb-16">
@@ -145,7 +226,14 @@ const StudyAbroad = () => {
                     </div>
                   ))}
                 </div>
-                <Button className="w-full rounded-full" variant="outline">
+                <Button
+                  className="w-full rounded-full"
+                  variant="outline"
+                  onClick={() => {
+                    setSelectedCountry(dest.country);
+                    setConsultDialogOpen(true);
+                  }}
+                >
                   Explore {dest.country}
                 </Button>
               </div>
@@ -196,6 +284,64 @@ const StudyAbroad = () => {
           </div>
         </div>
       </div>
+
+      {/* Consultants Dialog */}
+      <Dialog open={consultDialogOpen} onOpenChange={setConsultDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Visa Consultants {selectedCountry ? `for ${selectedCountry}` : ""}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {consultants.map((c) => (
+              <div key={c.id} className="glass-card p-4 rounded-xl flex items-center justify-between">
+                <div>
+                  <div className="font-semibold text-foreground">{c.name} · {c.firm}</div>
+                  <div className="text-sm text-muted-foreground">Focus: {c.focus} · Experience: {c.exp}</div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="font-bold text-primary">₹{c.rate}/hr</div>
+                  <Button className="rounded-full" onClick={() => startBooking(c)}>Book Session</Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Dialog */}
+      <Dialog open={payDialogOpen} onOpenChange={setPayDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirm Booking</DialogTitle>
+          </DialogHeader>
+          {selectedConsultant && (
+            <div className="space-y-4">
+              <div className="text-sm text-muted-foreground">
+                Consultant: <span className="font-medium text-foreground">{selectedConsultant.name}</span> · {selectedConsultant.firm}
+              </div>
+              <div className="space-y-2">
+                <Label>Date & Time</Label>
+                <Input type="datetime-local" value={dateTime} onChange={(e) => setDateTime(e.target.value)} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Hours</Label>
+                  <Input type="number" min={1} value={hours} onChange={(e) => setHours(Math.max(1, Number(e.target.value) || 1))} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Rate</Label>
+                  <Input value={`₹${selectedConsultant.rate}/hr`} disabled />
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="text-lg font-bold">Total</div>
+                <div className="text-lg font-bold text-primary">₹{selectedConsultant.rate * hours}</div>
+              </div>
+              <Button className="w-full" onClick={handlePay}>Pay & Book</Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
