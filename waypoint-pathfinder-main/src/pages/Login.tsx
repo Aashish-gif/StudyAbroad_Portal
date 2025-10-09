@@ -109,7 +109,9 @@ const Login = () => {
                       id="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
-                      className="pl-10 pr-10"
+                      value={formData.password}
+                      onChange={(e) => setFormData({...formData, password: e.target.value})}
+                      className="pl-10 pr-10 bg-white/10 border-white/20 text-white placeholder:text-white/60"
                     />
                     <button
                       type="button"
@@ -154,7 +156,9 @@ const Login = () => {
                       id="signupPassword"
                       type={showPassword ? "text" : "password"}
                       placeholder="Create a password"
-                      className="pl-10 pr-10"
+                      value={formData.password}
+                      onChange={(e) => setFormData({...formData, password: e.target.value})}
+                      className="pl-10 pr-10 bg-white/10 border-white/20 text-white placeholder:text-white/60"
                     />
                     <button
                       type="button"

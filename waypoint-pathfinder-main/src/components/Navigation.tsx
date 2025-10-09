@@ -47,7 +47,7 @@ const Navigation = () => {
           </motion.div>
           <div>
             <h1 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors">
-              Waypoint
+              PathBridge
             </h1>
             <motion.p 
               className="text-xs text-muted-foreground"
@@ -55,7 +55,7 @@ const Navigation = () => {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
             >
-              Your Global Education Partner
+              Bridge to Global Education
             </motion.p>
           </div>
         </Link>
