@@ -133,37 +133,24 @@ const Navigation = () => {
         })}
       </div>
 
-      {/* Profile Button */}
+      {/* Profile & Login Buttons */}
       <motion.div 
-        className="absolute bottom-6 left-6 right-6"
+        className="absolute bottom-6 left-6 right-6 space-y-3"
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.5, type: "spring", stiffness: 100 }}
       >
         <Link to="/profile">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Button
-              variant={isActive("/profile") ? "default" : "outline"}
-              className="w-full rounded-full h-12 font-semibold relative overflow-hidden"
-            >
-              <motion.div
-                className="flex items-center justify-center"
-                whileHover={{ x: 2 }}
-              >
-                <User className="h-4 w-4 mr-2" />
-                Profile
-              </motion.div>
-              
-              {/* Shimmer effect */}
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                initial={{ x: "-100%" }}
-                whileHover={{ x: "100%" }}
-                transition={{ duration: 0.6 }}
-              />
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button variant={isActive("/profile") ? "default" : "outline"} className="w-full rounded-full h-12 font-semibold">
+              <User className="h-4 w-4 mr-2" />Profile
+            </Button>
+          </motion.div>
+        </Link>
+        <Link to="/login">
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button className="w-full rounded-full h-12 font-semibold btn-primary-custom">
+              <User className="h-4 w-4 mr-2" />Login
             </Button>
           </motion.div>
         </Link>

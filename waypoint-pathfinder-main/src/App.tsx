@@ -17,6 +17,11 @@ import StudyAbroad from "./pages/StudyAbroad";
 import Resources from "./pages/Resources";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
+import MentorDashboard from "./pages/mentor/Dashboard";
+import ConsultantDashboard from "./pages/consultant/Dashboard";
+import MentorLayout from "./components/layouts/MentorLayout";
+import ConsultantLayout from "./components/layouts/ConsultantLayout";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +47,9 @@ const App = () => (
               <Route path="/study-abroad" element={<StudyAbroad />} />
               <Route path="/resources" element={<Resources />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/mentor/dashboard" element={<MentorLayout><MentorDashboard /></MentorLayout>} />
+              <Route path="/consultant/dashboard" element={<ConsultantLayout><ConsultantDashboard /></ConsultantLayout>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
