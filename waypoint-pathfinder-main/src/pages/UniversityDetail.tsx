@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, MapPin, DollarSign, GraduationCap, Users, Calendar, Award, Globe, BookOpen, Star, Clock, Shield } from "lucide-react";
@@ -12,6 +13,7 @@ import AnimatedBackground from "@/components/AnimatedBackground";
 
 const UniversityDetail = () => {
   const { universityId } = useParams();
+  const applySectionRef = useRef<HTMLDivElement | null>(null);
 
   // Mock data - in a real app, this would come from an API
   const universities = {
@@ -252,6 +254,8 @@ const UniversityDetail = () => {
     );
   }
 
+  // dedicated apply page handles application flow; no autoscroll needed here
+
   return (
     <div className="min-h-screen premium-bg py-20 px-6">
       <AnimatedBackground />
@@ -484,6 +488,7 @@ const UniversityDetail = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7, duration: 0.8 }}
           whileHover={{ scale: 1.02 }}
+          ref={applySectionRef}
         >
           {/* Animated background */}
           <motion.div
@@ -501,9 +506,11 @@ const UniversityDetail = () => {
               Our expert counselors can help you with the entire process.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="btn-primary-custom rounded-full px-10 h-16 text-lg font-semibold">
-                Start Application
-              </Button>
+              <Link to={`/universities/${universityId}/apply`}>
+                <Button size="lg" className="btn-primary-custom rounded-full px-10 h-16 text-lg font-semibold">
+                  Start Application
+                </Button>
+              </Link>
               <Button size="lg" variant="outline" className="rounded-full px-10 h-16 text-lg font-semibold border-2">
                 Talk to a Counselor
               </Button>
@@ -516,4 +523,3 @@ const UniversityDetail = () => {
 };
 
 export default UniversityDetail;
-

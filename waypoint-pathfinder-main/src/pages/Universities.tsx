@@ -1,10 +1,11 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Search, MapPin, DollarSign, GraduationCap, Star, TrendingUp, Users, Globe } from "lucide-react";
+import { Search, MapPin, DollarSign, GraduationCap } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import SplineUniversity from "@/components/SplineUniversity";
 import SplineFloatingElements from "@/components/SplineFloatingElements";
@@ -12,6 +13,8 @@ import PatternBackground from "@/components/PatternBackground";
 
 const Universities = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [country, setCountry] = useState<string>("all");
+  const navigate = useNavigate();
 
   const universities = [
     {
@@ -70,6 +73,20 @@ const Universities = () => {
     }
   ];
 
+  const countries = useMemo(() => {
+    const unique = Array.from(new Set(universities.map(u => u.country)));
+    return ["All Countries", ...unique];
+  }, []);
+
+  const filtered = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return universities.filter(u => {
+      const matchesQuery = q === "" || u.name.toLowerCase().includes(q) || u.country.toLowerCase().includes(q);
+      const matchesCountry = country === "all" || u.country === country;
+      return matchesQuery && matchesCountry;
+    });
+  }, [searchQuery, country]);
+
   return (
     <div className="min-h-screen premium-bg">
       <AnimatedBackground />
@@ -103,7 +120,7 @@ const Universities = () => {
             </motion.p>
           </motion.div>
 
-          {/* Search Bar */}
+          {/* Search & Filters */}
           <motion.div 
             className="glass-card p-6 rounded-2xl mb-12"
             initial={{ opacity: 0, y: 30 }}
@@ -126,6 +143,19 @@ const Universities = () => {
                   className="pl-10 h-12 rounded-full border-2 focus:border-primary transition-colors"
                 />
               </div>
+              <div className="w-full md:w-72">
+                <Select onValueChange={(v) => setCountry(v)} value={country}>
+                  <SelectTrigger className="h-12 rounded-full">
+                    <SelectValue placeholder="Country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Countries</SelectItem>
+                    {countries.slice(1).map((c) => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -144,7 +174,7 @@ const Universities = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.8 }}
           >
-            {universities.map((uni, index) => (
+            {filtered.map((uni, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 50, scale: 0.9 }}
@@ -254,22 +284,36 @@ const Universities = () => {
                   </div>
                 </div>
 
-                {/* Action Button */}
-                <Link to={`/universities/${uni.id}`} className="relative z-10">
+                {/* Action Buttons */}
+                <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <Link to={`/universities/${uni.id}`}>
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <Button className="w-full rounded-full group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                        <motion.span
+                          animate={{ x: [0, 5, 0] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                        >
+                          Learn More
+                        </motion.span>
+                      </Button>
+                    </motion.div>
+                  </Link>
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <Button className="w-full rounded-full group-hover:bg-primary group-hover:text-white transition-all duration-300">
-                      <motion.span
-                        animate={{ x: [0, 5, 0] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                      >
-                        Learn More
-                      </motion.span>
+                    <Button
+                      variant="outline"
+                      className="w-full rounded-full"
+                      onClick={() => navigate(`/universities/${uni.id}/apply`)}
+                    >
+                      Start Application
                     </Button>
                   </motion.div>
-                </Link>
+                </div>
                 
                 {/* Floating particles */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
