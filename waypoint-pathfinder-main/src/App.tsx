@@ -6,13 +6,15 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Navigation from "./components/Navigation";
 import MobileNav from "./components/MobileNav";
 
+import LandingPage from "./pages/Landing";
 import Landing from "./pages/Landing";
-import Index from "./pages/Index";
 import About from "./pages/About";
 import Universities from "./pages/Universities";
 import UniversityDetail from "./pages/UniversityDetail";
 import Courses from "./pages/Courses";
 import TestPrep from "./pages/TestPrep";
+import TestPrepDetail from "./pages/TestPrepDetail";
+import TestPrepStart from "./pages/TestPrepStart";
 import CareerCounseling from "./pages/CareerCounseling";
 import StudyAbroad from "./pages/StudyAbroad";
 import Resources from "./pages/Resources";
@@ -58,12 +60,14 @@ const AppContent = () => {
       <main className={`flex-1 ${shouldShowSidebar ? 'lg:ml-64 pt-20 lg:pt-0' : ''} relative z-10`}>
         <Routes>
           <Route path="/landing" element={<Landing />} />
-          <Route path="/" element={<Index />} />
+              <Route path="/" element={<LandingPage />} />
           <Route path="/about" element={<About />} />
           <Route path="/universities" element={<Universities />} />
           <Route path="/universities/:universityId" element={<UniversityDetail />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/test-prep" element={<TestPrep />} />
+              <Route path="/test-prep/:testId" element={<TestPrepDetail />} />
+              <Route path="/test-prep/:testId/start" element={<TestPrepStart />} />
           <Route path="/career-counseling" element={<CareerCounseling />} />
           <Route path="/study-abroad" element={<StudyAbroad />} />
           <Route path="/resources" element={<Resources />} />

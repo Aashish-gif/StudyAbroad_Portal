@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,12 @@ import { Eye, EyeOff, Mail, Lock, User, BookOpen, Users, Plane, Globe, Graduatio
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedRole, setSelectedRole] = useState<"student" | "mentor" | "consultant">("student");
-  const [formData, setFormData] = useState<{ password: string }>({ password: "" });
+  const [loginPassword, setLoginPassword] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
+  // Persist selected role
+  useEffect(() => {
+    try { sessionStorage.setItem('auth:selectedRole', selectedRole); } catch {}
+  }, [selectedRole]);
 
   const roles = [
     {
@@ -209,8 +214,8 @@ const Login = () => {
                       id="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
-                      value={formData.password}
-                      onChange={(e) => setFormData({...formData, password: e.target.value})}
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
                       className="pl-10 pr-10 bg-white/10 border-white/20 text-white placeholder:text-white/60"
                     />
                     <button
@@ -256,8 +261,8 @@ const Login = () => {
                       id="signupPassword"
                       type={showPassword ? "text" : "password"}
                       placeholder="Create a password"
-                      value={formData.password}
-                      onChange={(e) => setFormData({...formData, password: e.target.value})}
+                      value={signupPassword}
+                      onChange={(e) => setSignupPassword(e.target.value)}
                       className="pl-10 pr-10 bg-white/10 border-white/20 text-white placeholder:text-white/60"
                     />
                     <button
